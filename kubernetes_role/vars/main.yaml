@@ -1,0 +1,74 @@
+#docker directory
+dockerdir: /etc/docker/
+k8srepo: /etc/yum.repos.d/kubernetes.repo
+
+#docker and kubernets files
+daemonfile: daemon.json
+kubernetesrepo: kubernetes.repo
+
+#Kubernetes CNI
+network_calico: https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+network_flannel: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+pod_network: "192.168.0.0/16"
+pod_network_flannel: "10.244.0.0/16"
+
+#instal required
+docker_required:
+  - yum-utils
+  - device-mapper-persistent-data
+  - lvm2
+  - http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.107-3.el7.noarch.rpm
+
+#Knative yaml
+knative_install:
+  - https://github.com/knative/serving/releases/download/v0.10.0/serving.yaml
+  - https://github.com/knative/eventing/releases/download/v0.10.0/release.yaml
+
+#kubernetes required
+k8s_required:
+  - br_netfilter
+  - overlay
+
+#kubernetes dashboard
+dashboard: https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/recommended.yaml
+
+#storage
+storage: https://github.com/rook/rook.git
+
+#ingress controller
+ingress_controller: https://github.com/nginxinc/kubernetes-ingress.git
+
+#metric server
+metric_server: https://github.com/kubernetes-incubator/metrics-server.git
+
+#istio controller
+istio_operator: https://istio.io/operator.yaml
+
+#monitoring git
+monitoring_yaml: https://github.com/coreos/kube-prometheus.git
+
+#helm
+helm_install: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+
+######### logging git adres ######################
+logging_addres: https://github.com/banzaicloud/logging-operator.git
+logging_dir: /opt/logging
+
+logging_install:
+  - /opt/logging-operator/docs/deploy/manifests/rbac.yaml
+  - /opt/logging-operator/config/crd/bases/logging.banzaicloud.io_clusterflows.yaml
+  - /opt/logging-operator/config/crd/bases/logging.banzaicloud.io_clusteroutputs.yaml
+  - /opt/logging-operator/config/crd/bases/logging.banzaicloud.io_flows.yaml
+  - /opt/logging-operator/config/crd/bases/logging.banzaicloud.io_loggings.yaml
+  - /opt/logging-operator/config/crd/bases/logging.banzaicloud.io_outputs.yaml
+  - /opt/logging-operator/docs/deploy/manifests/deployment.yaml
+
+#jinja files
+logging_jinja_file: fluend-logging.yaml.j2
+logging_file_dir: /opt/logging/fluend-logging.yaml
+logging_namespaces: kube-logging
+logging_clustername: es-cluster
+logging_elastic_image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+logging_kibana_image: docker.elastic.co/kibana/kibana:7.5.0
+logging_fluentd_image: fluent/fluentd-kubernetes-daemonset:v1.4.2-debian-elasticsearch-1.1
+###############################

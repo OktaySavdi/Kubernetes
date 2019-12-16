@@ -1,0 +1,38 @@
+#install network
+- name: install istio operator
+  command: |
+     kubectl apply -f "{{ istio_operator }}"
+  register: apply_istio
+  until: apply_istio.rc == 0
+  retries: 10
+  delay: 2
+
+#install IstioControlPlane
+- name: install IstioControlPlane
+  shell:
+    cmd: |
+      kubectl apply -f - <<EOF
+      apiVersion: install.istio.io/v1alpha2
+      kind: IstioControlPlane
+      metadata:
+        namespace: istio-operator
+        name: example-istiocontrolplane
+      spec:
+        profile: demo
+      EOF
+
+#wait for pods to come up
+- name: istio-operator - wait for pods to come up
+  shell: kubectl -n istio-operator get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 10
+
+#wait for pods to come up
+- name: istio - wait for pods to come up
+  shell: kubectl -n istio-system get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 40
+  delay: 10

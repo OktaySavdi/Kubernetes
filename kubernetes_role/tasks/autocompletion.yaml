@@ -1,0 +1,13 @@
+---
+#install bash-completion
+- name: Install bash-completion packages
+  yum:
+    name: bash-completion
+    state: present
+
+#configure autocompletion
+- name: configure bash-completion for server
+  raw: |
+     source <(kubectl completion bash)
+     echo "source <(kubectl completion bash)" >> ~/.bashrc
+     source .bashrc

@@ -1,0 +1,36 @@
+#Install kubernetes dashboard
+- name: Install kubernetes dashboard
+  command: kubectl apply -f "{{ dashboard }}"
+
+#apply cluster role binding
+- name: Create ClusterRoleBinding and Service Account
+  shell:
+    cmd: |
+      kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: admin-user
+        namespace: kubernetes-dashboard
+      ---
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: admin-user
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+      - kind: ServiceAccount
+        name: admin-user
+        namespace: kubernetes-dashboard
+      EOF
+
+#wait for pods to come up
+- name: kubernetes-dashboard - wait for pods to come up
+  shell: kubectl -n kubernetes-dashboard get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 10

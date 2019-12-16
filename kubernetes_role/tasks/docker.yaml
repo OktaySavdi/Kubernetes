@@ -1,0 +1,49 @@
+---
+- name: Create docker Directory
+  file:
+    path: "{{ dockerdir }}"
+    state: directory
+
+#copy json for docker
+- name: Copy docker files
+  copy:
+    src: "{{ daemonfile }}"
+    dest: "{{ dockerdir }}{{ daemonfile }}"
+
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+  become: yes
+
+#install docker dependencies
+- name: Install required packages
+  yum:
+    name: "{{ docker_required }}"
+    state: present
+  register: apply_feature
+  until: apply_feature.rc == 0
+  retries: 10
+  delay: 2
+
+#update os
+- name: run yum update
+  yum:
+    name: '*'
+    state: latest
+
+#docker install
+- name: Install Docker
+  yum:
+    name: docker-ce
+    state: present
+  register: apply_docker
+  until: apply_docker.rc == 0
+  retries: 10
+  delay: 2
+
+#Reload service,start
+- name: service enable and start docker
+  command: echo "this task will do some konfigurations"
+  notify :
+    - Reload daemon

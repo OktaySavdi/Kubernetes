@@ -1,0 +1,34 @@
+#Firewall Service
+- name: Stop and disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: False
+
+#Disable Selinux
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+#set hostname
+- name: set hostname
+  hostname:
+    name: "{{ hostvars[inventory_hostname].host_fqdn }}"
+
+#add computername on hosts file
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].host_fqdn.split('.')[0]}} {{ hostvars[item].host_fqdn }}"
+    state: present
+  with_items: "{{ groups.all }}"
+
+#Disable OS SWAP
+- name: Disable swapoff
+  shell: swapoff -a
+
+- name: Disable swapoff permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'

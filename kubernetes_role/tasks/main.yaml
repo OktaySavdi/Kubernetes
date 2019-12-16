@@ -1,0 +1,66 @@
+---
+#- include_tasks: configuration.yaml
+#
+#- include_tasks: docker.yaml
+#
+#- include_tasks: kubernetes.yaml
+#
+#- include_tasks: autocompletion.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_autocompletion | bool == true
+#
+#- include_tasks: kubens.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_kubens | bool == true
+#
+#- include_tasks: metric_server.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_metric_server | bool == true
+#
+#- include_tasks: storage.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].storage.ceph | bool == true or hostvars['master'].addon.enable_logging | bool == true
+#
+#- include_tasks: ingress_controller.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_ingress_controler | bool == true
+#
+#- include_tasks: dashboard.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_dashboard | bool == true
+#
+#- include_tasks: helm.yaml
+#  when:
+#    -  "'master' in group_names"
+#    - hostvars['master'].addon.enable_helm | bool == true
+#
+#- include_tasks: istio.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_istio | bool == true or hostvars['master'].serverless.knative | bool == true
+#
+#- include_tasks: knative.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].serverless.knative | bool == true
+#
+#- include_tasks: kubeless.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].serverless.kubeless | bool == true
+#
+#- include_tasks: logging.yaml
+#  when:
+#    - "'master' in group_names"
+#    - hostvars['master'].addon.enable_logging | bool == true
+
+- include_tasks: monitoring.yaml
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].addon.enable_monitoring | bool == true

@@ -1,0 +1,31 @@
+---
+# download git repo for monitoring
+- name: download git repo for monitoring
+  git:
+    repo: "{{ monitoring_yaml }}"
+    dest: /opt/kube-prometheus
+    force: yes
+
+#install monitoring
+- name: install monitoring filename
+  command: kubectl create --filename "/opt/kube-prometheus/manifests/"
+  register: apply_monitoring
+  until: apply_monitoring.rc == 0
+  retries: 30
+  delay: 10
+
+#apply monitoring
+- name: apply monitoring filename
+  command: kubectl apply --filename "/opt/kube-prometheus/manifests/"
+  register: apply_monitoring2
+  until: apply_monitoring2.rc == 0
+  retries: 30
+  delay: 10
+
+#wait for pods to come up
+- name: monitoring - wait for pods to come up
+  shell: kubectl -n monitoring get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 30
+  delay: 10

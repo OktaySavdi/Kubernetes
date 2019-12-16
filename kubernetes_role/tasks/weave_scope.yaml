@@ -1,0 +1,14 @@
+#install weave
+- name: Apply weave scope controller yaml
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/scope.yaml?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+  register: apply_weave_scope
+  until: apply_weave_scope.rc == 0
+  retries: 20
+
+#wait for pods to come up
+- name: weave - wait for pods to come up
+  shell: kubectl -n weave get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 10

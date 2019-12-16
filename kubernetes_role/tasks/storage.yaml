@@ -1,0 +1,37 @@
+---
+# download git repo for rook-ceph
+- name: download git repo for rook-ceph
+  git:
+    repo: "{{ storage }}"
+    dest: /opt/rook
+    force: yes
+
+#Apply ceph yaml
+- name: Apply ceph yaml
+  command: |
+     kubectl apply -f "{{ item }}"
+  with_items:
+    - /opt/rook/cluster/examples/kubernetes/ceph/common.yaml
+    - /opt/rook/cluster/examples/kubernetes/ceph/operator.yaml
+    - /opt/rook/cluster/examples/kubernetes/ceph/cluster.yaml
+    - /opt/rook/cluster/examples/kubernetes/ceph/csi/rbd/storageclass.yaml
+    - /opt/rook/cluster/examples/kubernetes/ceph/filesystem.yaml
+    - /opt/rook/cluster/examples/kubernetes/ceph/object.yaml
+    - /opt/rook/cluster/examples/kubernetes/ceph/toolbox.yaml
+  register: apply_ceph
+  until: apply_ceph.rc == 0
+  retries: 30
+  delay: 2
+
+- name: 10 seconds wait for pods creating
+  wait_for:
+    timeout: 10
+
+#wait for pods to come up
+- name: storage - wait for pods to come up
+  shell: kubectl -n rook-ceph get pods --field-selector=status.phase!=Running,status.phase!=Succeeded | wc -l
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout == "0"
+  retries: 50
+  delay: 10
+  when: "'master' in group_names"

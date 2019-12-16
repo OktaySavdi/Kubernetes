@@ -1,0 +1,11 @@
+---
+networkingyaml: /path/to/network.yaml
+ansiblerpm: /path/to/ansible.rpm/
+dockerrpms: /path/to/docker.rpm/
+k8srpms: /path/to/k8s.rpm/
+k8simages: /path/to/k8s.images/
+networkingimages: /path/to/network.images/
+registryimage: /path/to/registry.images/
+dockerpip: /path/to/dockerpipsdk/
+pythonpip: /path/to/pythonpip.rpm/
+opensslpip: /path/to/pyopensslsdk/

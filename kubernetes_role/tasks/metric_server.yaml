@@ -1,0 +1,30 @@
+---
+# Download git repo
+- name: download metric server repo
+  git:
+    repo: "{{ metric_server }}"
+    dest: /opt/metrics-server
+    force: yes
+
+#copy metric-server yaml file
+- name: Copy metric-server files
+  copy:
+    src: "metrics-server-deployment.yaml"
+    dest: "/opt/metrics-server/deploy/1.8+/"
+
+#install network
+- name: Apply metric-server yaml
+  command: |
+     kubectl apply -f /opt/metrics-server/deploy/1.8+/
+  register: apply_metricserver
+  until: apply_metricserver.rc == 0
+  retries: 10
+  delay: 2
+
+#wait for pods to come up
+- name: metric-server - wait for pods to come up
+  shell: kubectl -n kube-system get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 10

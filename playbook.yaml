@@ -1,0 +1,5 @@
+---
+- name: Install k8s_role
+  hosts: all
+  roles:
+      - kubernetes_role

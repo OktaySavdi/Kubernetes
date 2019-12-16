@@ -1,0 +1,8 @@
+---
+#install kubens for namespaces
+- name: install kubens for namespaces
+  raw: |
+      git clone https://github.com/ahmetb/kubectx.git ~/.kubectx
+      COMPDIR=$(pkg-config --variable=completionsdir bash-completion)
+      ln -sf ~/.kubectx/completion/kubens.bash $COMPDIR/kubens
+      echo "export PATH=~/.kubectx:\$PATH" | tee --append ~/.bashrc

@@ -1,0 +1,20 @@
+#kubeless installation
+- name: install kubeless
+  shell:
+    cmd: |
+     export RELEASE=$(curl -s https://api.github.com/repos/kubeless/kubeless/releases/latest | grep tag_name | cut -d '"' -f 4)
+     kubectl create ns kubeless
+     kubectl create -f https://github.com/kubeless/kubeless/releases/download/$RELEASE/kubeless-$RELEASE.yaml
+  register: apply_kubeless
+  until: apply_kubeless.rc == 0
+  retries: 10
+  delay: 2
+  when: "'master' in group_names"
+
+#wait for pods to come up
+- name: kubeless - wait for pods to come up
+  shell: kubectl -n kubeless get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 10

@@ -1,0 +1,174 @@
+#install git
+- name: Install git packages
+  yum:
+    name: git
+    state: present
+  when: "'master' in group_names"
+
+#copy repo file for k8s
+- name: Copy kubernetes repo files
+  copy:
+    src: "{{ kubernetesrepo }}"
+    dest: "{{ k8srepo }}"
+
+#Kubernetes install
+- name: Install kubernetes
+  yum:
+    name: kubeadm
+    state: present
+  register: apply_k8s
+  until: apply_k8s.rc == 0
+  retries: 10
+  delay: 2
+
+#Reboot Machine if swap changed
+- name: Reboot immediately if there was a change
+  shell: "sleep 5 && reboot"
+  async: 10 # Do not care for 10 sec
+  poll: 0 # Fire & Forget
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5 # Do not check for at least 5 sec
+    timeout: 300
+
+#Add modprobe and overlay Kernel module
+- name: Add "modprobe" and "overlay" kernel module
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ k8s_required }}"
+
+#add config sysctl conf
+- sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { name: 'net.ipv4.ip_forward', value:  '1' }
+    - { name: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+    - { name: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+
+#Reload service,start and reboot
+- name: Reload service,start docker and kubernetes
+  service:
+    name: "{{item}}"
+    daemon_reload: yes
+    enabled: yes
+    state: started
+  with_items:
+    - docker
+    - kubelet
+
+#Start kubeadm init
+- name: Start kubeadm init for calico
+  command: kubeadm init --pod-network-cidr={{ pod_network }} --service-dns-domain {{ hostvars['master'].fqdn }}
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].network.calico | bool == true
+
+- name: Start kubeadm init for flannel
+  command: kubeadm init --pod-network-cidr={{ pod_network_flannel }} --service-dns-domain {{ hostvars['master'].fqdn }}
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].network.flannel | bool == true
+
+#check kubernetes on master
+- name: wait for apiserver,etcd,schedule,controller,proxy port to be open
+  wait_for:
+    host: 127.0.0.1
+    port: "{{ item }}"
+    delay: 2
+    connect_timeout: 2
+    timeout: 1800
+  with_items:
+    - 6443
+    - 2379
+    - 10251
+    - 10252
+    - 10256
+  when: "'master' in group_names"
+
+#kubernetes pre config
+- name: kube config configuration
+  shell: "{{ item }}"
+  with_items:
+    - "mkdir -p $HOME/.kube"
+    - "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
+    - "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+  when: "'master' in group_names"
+
+#install network
+- name: Apply Kubernetes CNI for Calico
+  command: |
+     kubectl apply -f {{ network_calico }}
+  register: apply_cni
+  until: apply_cni.rc == 0
+  retries: 10
+  delay: 2
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].network.calico | bool == true
+
+#wait for calico pods to come up
+- name: calico - wait for pods to come up
+  shell: kubectl -n kube-system get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 30
+  delay: 10
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].network.calico | bool == true
+
+- name: Apply Kubernetes CNI for flannel
+  command: |
+     kubectl apply -f {{ network_flannel }}
+  register: apply_cni
+  until: apply_cni.rc == 0
+  retries: 10
+  delay: 2
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].network.flannel | bool == true
+
+- name: wait for flannel interface to enable interface
+  shell: "ls -d1 /sys/class/net/*"
+  register: all_interfaces
+  until: all_interfaces.stdout.find('flannel') != -1
+  retries: 20
+  delay: 3
+  when:
+    - "'master' in group_names"
+    - hostvars['master'].network.flannel | bool == true
+
+#join kubernetes cluster
+- name: Generate join token
+  shell: kubeadm token create --print-join-command
+  register: join_command
+  delegate_to: "{{ groups['master'][0] }}"
+
+- name: Copy join command to local file
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+
+- name: Copy the join command to server location
+  copy: src=join-command dest=/tmp/join-command.sh mode=0777
+
+- name: Join the node to cluster
+  command: sh /tmp/join-command.sh
+  when: "'workers' in group_names"
+
+- name: get cluster node list
+  shell: 'kubectl get nodes | grep -c Ready'
+  register: kubectl_result
+  ignore_errors: yes
+  when: "'master' in group_names"
+
+- name: ensure Kubernetes nodes are present and ready
+  assert:
+    that:
+      - "'0' not in kubectl_result.stdout"
+  when: "'master' in group_names"

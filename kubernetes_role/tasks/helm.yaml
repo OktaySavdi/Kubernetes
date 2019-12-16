@@ -1,0 +1,14 @@
+---
+#install helm 3.0
+- name: install helm 3.0
+  shell: curl "{{ helm_install }}" | bash
+  register: apply_helm
+  until: apply_helm.rc == 0
+  retries: 3
+  delay: 3
+
+#Add helm repo
+- name: Add helm repo for googleapis
+  raw: |
+     helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+     helm repo update

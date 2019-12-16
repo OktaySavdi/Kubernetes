@@ -1,0 +1,44 @@
+all:
+  hosts:
+    master:
+      ansible_host: 10.10.10.10
+      host_fqdn: k8s-master01.k8s.nip.io
+      fqdn: k8s.nip.io
+    worker1:
+      ansible_host: 10.10.10.11
+      host_fqdn: k8s-worker01.k8s.nip.io
+    worker2:
+      ansible_host: 10.10.10.12
+      host_fqdn: k8s-worker02.k8s.nip.io
+    worker3:
+      ansible_host: 10.10.10.13
+      host_fqdn: k8s-worker03.k8s.nip.io
+  children:
+    master:
+      hosts:
+        master:
+      vars:
+        network:
+          calico: "true"
+          flannel: "false"
+        storage:
+          ceph: "true"
+        serverless:
+          knative: "true"
+          kubeless: "false"
+        addon:
+          enable_autocompletion: "true"
+          enable_kubens: "true"
+          enable_metric_server: "true"
+          enable_istio: "true"
+          enable_helm: "true"
+          enable_dashboard: "true"
+          enable_logging: "true"
+          enable_monitoring: "true"
+          enable_weave_scope: "true"
+          enable_ingress_controler: "true"
+    workers:
+      hosts:
+        worker1:
+        worker2:
+        worker3:

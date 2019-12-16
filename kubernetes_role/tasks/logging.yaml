@@ -1,0 +1,27 @@
+#create directory for logging
+- name: Create logging Directory
+  file:
+    path: "{{ logging_dir }}"
+    state: directory
+
+#copy yaml file for logging
+- name: copy logging yaml files
+  template:
+    src: "{{ logging_jinja_file }}"
+    dest: "{{ logging_file_dir }}"
+
+#install kubernetes-logging
+- name: install kubernetes-logging
+  command: kubectl create --filename "{{ logging_file_dir }}"
+  register: apply_logging
+  until: apply_logging.rc == 0
+  retries: 10
+  delay: 2
+
+#wait for pods to come up
+- name: kubernetes-logging - wait for pods to come up
+  shell: kubectl -n kube-logging get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 30
+  delay: 10

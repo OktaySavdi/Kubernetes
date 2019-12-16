@@ -1,0 +1,30 @@
+---
+# download git repo
+- name: download git repo for ingress ingress_controller to /opt/kubernetes-ingress
+  git:
+    repo: "{{ ingress_controller }}"
+    dest: /opt/kubernetes-ingress
+    force: yes
+
+#install ingress controller
+- name: install ingress controller yaml
+  command: |
+     kubectl apply -f "{{ item }}"
+  with_items:
+    - /opt/kubernetes-ingress/deployments/common/ns-and-sa.yaml
+    - /opt/kubernetes-ingress/deployments/common/default-server-secret.yaml
+    - /opt/kubernetes-ingress/deployments/common/nginx-config.yaml
+    - /opt/kubernetes-ingress/deployments/rbac/rbac.yaml
+    - /opt/kubernetes-ingress/deployments/daemon-set/nginx-ingress.yaml
+  register: apply_ingress
+  until: apply_ingress.rc == 0
+  retries: 10
+  delay: 2
+
+#wait for pods to come up
+- name: ingress_controller - wait for pods to come up
+  shell: kubectl -n nginx-ingress get pods -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 10
