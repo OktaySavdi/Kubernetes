@@ -61,7 +61,7 @@ ansible-playbook playbook.yml -i inventory.yml
 
 you need to define ingress for all components we install
 
-> ingress.yaml
+> kiali-ingress.yaml example:
 
     apiVersion: extensions/v1beta1
     kind: Ingress
