@@ -4,5 +4,5 @@ galaxy_info:
   company: your company (optional)
   license: license (GPL-2.0-or-later, MIT, etc)
   min_ansible_version: 2.8.5
-  galaxy_tags: [Kubernetes,cluster,docker,kubens,metric server,storage,ceph,ingress controller,ingress,dashboard,helm,istio,knative,kubeless,logging,monitoring,kalico,flannel]
+  galaxy_tags: [Kubernetes,cluster,docker,kubens,metric server,storage,ceph,ingress controller,ingress,dashboard,helm,istio,knative,kubeless,logging,monitoring,calico,flannel]
 dependencies: []
