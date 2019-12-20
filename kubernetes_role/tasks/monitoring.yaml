@@ -7,7 +7,7 @@
     force: yes
 
 #install monitoring
-- name: install monitoring filename
+- name: install monitoring
   command: kubectl create --filename "/opt/kube-prometheus/manifests/"
   register: apply_monitoring
   until: apply_monitoring.rc == 0
