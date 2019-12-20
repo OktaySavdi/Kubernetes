@@ -15,7 +15,7 @@
   delay: 10
 
 #apply monitoring
-- name: apply monitoring filename
+- name: apply monitoring
   command: kubectl apply --filename "/opt/kube-prometheus/manifests/"
   register: apply_monitoring2
   until: apply_monitoring2.rc == 0
