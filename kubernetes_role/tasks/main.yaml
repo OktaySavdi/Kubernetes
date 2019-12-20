@@ -40,6 +40,11 @@
     -  "'master' in group_names"
     - hostvars['master'].addon.enable_helm | bool == true
 
+- include_tasks: weave_scope.yaml
+  when:
+    -  "'master' in group_names"
+    - hostvars['master'].addon.enable_weave_scope | bool == true
+
 - include_tasks: istio.yaml
   when:
     - "'master' in group_names"
