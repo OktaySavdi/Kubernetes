@@ -8,19 +8,23 @@
 
 #install monitoring
 - name: install monitoring
-  command: kubectl create --filename "/opt/kube-prometheus/manifests/"
+  shell:
+    cmd: |
+     kubectl create --filename "/opt/kube-prometheus/manifests/setup/"
+     kubectl create --filename "/opt/kube-prometheus/manifests/"
   register: apply_monitoring
   until: apply_monitoring.rc == 0
   retries: 30
   delay: 10
 
 #apply monitoring
-- name: apply monitoring
+- name: apply monitoring filename
   command: kubectl apply --filename "/opt/kube-prometheus/manifests/"
   register: apply_monitoring2
   until: apply_monitoring2.rc == 0
   retries: 30
   delay: 10
+
 
 #wait for pods to come up
 - name: monitoring - wait for pods to come up
