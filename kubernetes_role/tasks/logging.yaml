@@ -23,5 +23,5 @@
   shell: kubectl -n kube-logging get pods -o json
   register: kubectl_get_pods
   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
-  retries: 30
+  retries: 50
   delay: 10
