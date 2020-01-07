@@ -1,4 +1,5 @@
 
+
 # Install Kubernetes Cluster with Ansible
 ![Install Kubernetes Cluster with ansible](https://user-images.githubusercontent.com/3519706/70437658-27508f00-1a9d-11ea-9815-df22c78c2568.jpg)
 
@@ -6,6 +7,7 @@
 -  Ansible (≥ 2.8.5)
 -  CentOS/RHEL 7
 - *CoreOS **(In future release)**
+- ISO Repo
 
 We made kubernetes cluster installation automation with ansible.
 **Purpose:** Provide end-to-end installation with all components 
@@ -13,6 +15,7 @@ We made kubernetes cluster installation automation with ansible.
 ![kubernetes cluster addons](https://user-images.githubusercontent.com/3519706/70437685-35061480-1a9d-11ea-9ae5-45d81e55e900.png)
 
 Addons that can be installed with automation are as follows:
+
 **Note:** Addons can be upgraded with the appopriate links or file under **vars/main.yaml**
 
 Network
@@ -43,7 +46,6 @@ Storage
 
 - [Cluster Logging(fluentd)](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes)   addon needs  **≥32GB** of Ram.
 - To enable [Ceph](https://rook.io/docs/rook/v1.1/ceph-examples.html), **three worker nodes** should be present and worker nodes should have **≥10GB** disk space. (Extra disk should be added to use Ceph. However do not mount that disk. Otherwise Ceph will not work)
-- 
 
 **Before Run Ansible**
 ```
