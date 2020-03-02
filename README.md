@@ -56,7 +56,7 @@ pip install jmespath
 **Run Playbook**
 
 ```
-ansible-playbook playbook.yml -i inventory.yml
+ansible-playbook playbook.yaml -i inventory.yaml
 ```
 
 **`kubens`** helps you switch between Kubernetes namespaces smoothly
