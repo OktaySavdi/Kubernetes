@@ -76,6 +76,7 @@ you need to define ingress for all components we install
 
 > kiali-ingress.yaml example:
 
+```yaml
     apiVersion: extensions/v1beta1
     kind: Ingress
     metadata:
@@ -90,3 +91,4 @@ you need to define ingress for all components we install
               backend:
                 serviceName: kiali
                 servicePort: 20001
+```
