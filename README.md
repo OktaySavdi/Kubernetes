@@ -77,18 +77,18 @@ you need to define ingress for all components we install
 > kiali-ingress.yaml example:
 
 ```yaml
-    apiVersion: extensions/v1beta1
-    kind: Ingress
-    metadata:
-      name: kiali-ingress
-      namespace: istio-system
-    spec:
-      rules:
-      - host: kiali-10-10-10-11(worker_ip_addres).nip.io
-        http:
-          paths:
-            - path: /
-              backend:
-                serviceName: kiali
-                servicePort: 20001
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kiali-ingress
+  namespace: istio-system
+spec:
+  rules:
+  - host: kiali-10-10-10-11(worker_ip_addres).nip.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kiali
+          servicePort: 20001
 ```
