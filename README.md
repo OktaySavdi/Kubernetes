@@ -57,9 +57,9 @@ pip install jmespath
 
     ssh-keygen
     for host in 10.10.10.10 \
-                   10.10.10.11 \
-    		       10.10.10.12 \
-    		       10.10.10.13;\
+                10.10.10.11 \
+    		          10.10.10.12 \
+    		          10.10.10.13;\
     do ssh-copy-id -i ~/.ssh/id_rsa.pub $host; \
     done
 
